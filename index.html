@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hyperfuente — alter_a · espacio 360</title>
+<style>
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:block;src:url(fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:block;src:url(fonts/ibm-plex-mono-latin-ext-400-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:block;src:url(fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:block;src:url(fonts/ibm-plex-mono-latin-ext-500-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:700;font-display:block;src:url(fonts/ibm-plex-mono-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:700;font-display:block;src:url(fonts/ibm-plex-mono-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;}
+  :root{--lime:#D5FE00;--pink:#F099EA;--ink:#ffffff;--bg:#000;--sub:#cfcfcf}
+  body.rosa{--ink:#111;--bg:#F099EA;--sub:#222}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'IBM Plex Mono',ui-monospace,monospace;color:var(--ink)}
+  canvas{display:block;touch-action:none;cursor:grab}
+  canvas.dragging{cursor:grabbing} canvas.hover{cursor:pointer}
+  .ui{position:fixed;inset:0;pointer-events:none;padding:22px 24px;display:flex;flex-direction:column;justify-content:space-between}
+  header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  .logo svg{height:clamp(46px,7vw,84px);width:auto;display:block;overflow:visible}
+  .logo .f{fill:var(--ink)} .logo .s{fill:none;stroke:var(--pink);stroke-width:7}
+  body.rosa .logo .s{stroke:#fff}
+  .sub{font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-top:12px;color:var(--sub);line-height:1.6;max-width:360px}
+  .sub b{background:var(--lime);color:#000;padding:1px 5px;font-weight:700}
+  .compass{font-size:11px;text-align:right;letter-spacing:.08em;line-height:1.5}
+  .compass b{display:block;font-size:24px;font-weight:500;letter-spacing:-.02em}
+  footer{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .hint{font-size:11px;letter-spacing:.05em;line-height:1.7;text-transform:uppercase;color:var(--sub)}
+  .controls{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;pointer-events:auto}
+  button,.frag{font:500 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;background:transparent;color:var(--ink);border:1px solid var(--ink);padding:9px 12px;cursor:pointer}
+  button:hover{background:var(--ink);color:var(--bg)}
+  button.on{background:var(--ink);color:var(--bg)}
+  #tour.on{background:var(--lime);border-color:var(--lime);color:#000}
+  .frag{display:flex;align-items:center;gap:8px;cursor:default}
+  .frag input{-webkit-appearance:none;appearance:none;width:110px;height:2px;background:var(--ink);outline:none}
+  .frag input::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:18px;background:var(--lime);border:1px solid #000;cursor:pointer}
+  .frag input::-moz-range-thumb{width:12px;height:18px;background:var(--lime);border:1px solid #000;border-radius:0;cursor:pointer}
+  .card{position:fixed;right:24px;top:50%;transform:translate(16px,-50%);opacity:0;transition:all .35s ease;pointer-events:none;width:230px;border:1px solid var(--ink);background:var(--bg)}
+  .card.show{opacity:1;transform:translate(0,-50%)}
+  .card .hd{background:var(--lime);color:#000;font-weight:700;font-size:11px;letter-spacing:.08em;padding:5px 8px;display:flex;justify-content:space-between}
+  .card svg{display:block;margin:16px auto 6px;height:150px;width:auto;overflow:visible}
+  .card svg .f{fill:var(--lime)} .card svg .s{fill:none;stroke:var(--pink);stroke-width:5}
+  body.rosa .card svg .f{fill:#111}
+  .card .meta{font-size:11px;line-height:1.6;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px 12px;border-top:1px solid var(--ink)}
+  .cross{position:fixed;left:50%;top:50%;width:13px;height:13px;margin:-6px 0 0 -6px;pointer-events:none;opacity:.6}
+  .cross:before,.cross:after{content:"";position:absolute;background:var(--ink)}
+  .cross:before{left:6px;top:0;width:1px;height:13px}.cross:after{top:6px;left:0;height:1px;width:13px}
+  #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--bg);transition:opacity .6s}
+  @media (max-width:680px){.hint{display:none}.card{right:10px;width:180px}.card svg{height:110px}.ui{padding:14px}.frag input{width:80px}}
+</style>
+</head>
+<body>
+<div id="load">cargando alter_a…</div>
+<div class="cross"></div>
+<div class="ui">
+  <header>
+    <div>
+      <div class="logo"><svg viewBox="-4 -4 932 610"><defs><g id="lg"><path d="M196.731 563.775L323.23 563.77L323.229 508.341H307.51C308.242 521.834 306.779 543.715 280.458 547.363H222.333C214.169 545.78 197.62 538.098 196.743 520.008L196.731 519.746C196.029 503.52 196.238 351.536 196.537 236.461L196.63 202.77L196.636 200.567L196.644 198.016L196.731 169.879L196.731 236.461L323.018 236.461V173.918V173.222V154.101C323.018 154.101 323.78 144.789 315.802 135.634C308.585 127.357 300.308 126.508 300.308 126.508L196.731 126.508L196.731 6.68046e-07L181.449 0L181.449 126.508L181.449 236.461L181.449 563.775H196.731Z"/><path d="M504.825 564.136H489.859V127.27C491.159 127.212 492.459 127.096 493.731 127.096C531.433 127.096 569.165 126.807 606.867 127.241C616.835 127.356 623.913 133.886 628.073 142.611C630.153 146.945 631.482 152.087 631.54 156.854C631.771 182.943 631.511 209.061 631.395 235.15C631.395 235.728 631.28 236.335 631.136 237.461H626.888C598.229 237.461 569.598 237.375 540.938 237.548C535.796 237.577 530.509 238.097 525.597 239.513C514.012 242.835 505.98 253.612 505.518 265.601C505.2 273.807 504.94 282.012 504.94 290.217C504.883 380.011 504.854 469.835 504.854 559.629C504.854 561.045 504.854 562.46 504.854 564.078L504.825 564.136Z"/><path d="M461.221 516.377H476.423V563.859H335.438V127.002H476.72V131.167C476.72 223.394 476.72 315.621 476.72 407.847C476.72 421.205 469.342 432.213 457.561 436.348C455.806 436.973 453.872 437.271 451.998 437.271C428.168 437.419 404.339 437.449 380.509 437.598C363.67 437.717 350.848 450.599 350.818 467.467C350.759 484.366 350.759 501.264 350.818 518.133C350.878 535.12 363.462 547.764 380.509 547.883C397.526 548.002 414.573 547.943 431.59 547.883C448.25 547.854 460.626 535.626 461.102 518.876C461.102 518.192 461.161 517.538 461.25 516.377H461.221ZM461.072 223.305C461.072 206.406 461.131 189.538 461.072 172.639C461.012 157.943 450.362 144.644 435.844 143.841C416.179 142.77 396.366 142.71 376.701 143.752C361.29 144.585 350.848 157.675 350.818 173.264C350.789 206.347 350.759 239.459 350.818 272.542C350.818 289.648 363.7 302.411 380.806 302.441C397.556 302.441 414.305 302.441 431.054 302.441C448.547 302.441 461.072 289.857 461.102 272.304C461.102 255.971 461.102 239.608 461.102 223.275L461.072 223.305Z"/><path d="M168.785 563.329H154.191V1.28809H168.785V563.329Z"/><path d="M627.295 563.763L627.295 549.506L768.566 549.506L768.566 563.763L627.295 563.763Z"/><path d="M15.5131 174.669H0.237294V127.002H141.694V564.195H0C0 562.652 0 561.317 0 559.953C0 467.703 0 375.483 0 283.233C0 271.843 4.68656 262.826 14.5639 257.16C17.9157 255.232 22.187 254.164 26.0727 254.075C50.0394 253.63 74.0061 253.69 97.9431 253.334C112.596 253.126 125.41 241.083 125.795 226.489C126.3 207.565 126.3 188.611 125.795 169.686C125.41 155.359 112.507 143.227 98.1804 143.049C79.9384 142.812 61.6668 142.812 43.4248 143.049C28.7719 143.257 16.8182 155.626 15.7207 171.11C15.6317 172.178 15.5724 173.245 15.4834 174.64L15.5131 174.669ZM126.062 468.237C126.062 451.626 126.122 435.015 126.062 418.375C125.973 401.467 113.664 388.801 96.816 388.564C79.5232 388.327 62.2304 388.327 44.9376 388.564C28.5643 388.772 15.9284 401.319 15.8097 417.693C15.6021 451.478 15.5724 485.263 15.8097 519.019C15.9284 535.363 28.9499 547.673 45.2638 547.673C62.0227 547.673 78.7816 547.673 95.5108 547.673C113.694 547.673 126.003 535.422 126.062 517.239C126.092 500.895 126.062 484.551 126.062 468.207V468.237Z"/><path d="M797.009 174.669H781.733V127.002H923.19V564.195H781.496C781.496 562.652 781.496 561.317 781.496 559.953C781.496 467.703 781.496 375.483 781.496 283.233C781.496 271.843 786.183 262.826 796.06 257.16C799.412 255.232 803.683 254.164 807.569 254.075C831.535 253.63 855.502 253.69 879.439 253.334C894.092 253.126 906.906 241.083 907.292 226.489C907.796 207.565 907.796 188.611 907.292 169.686C906.906 155.359 894.003 143.227 879.676 143.049C861.435 142.812 843.163 142.812 824.921 143.049C810.268 143.257 798.314 155.626 797.217 171.11C797.128 172.178 797.069 173.245 796.98 174.64L797.009 174.669ZM907.559 468.237C907.559 451.626 907.618 435.015 907.559 418.375C907.47 401.467 895.16 388.801 878.312 388.564C861.019 388.327 843.726 388.327 826.434 388.564C810.06 388.772 797.424 401.319 797.306 417.693C797.098 451.478 797.069 485.263 797.306 519.019C797.424 535.363 810.446 547.673 826.76 547.673C843.519 547.673 860.278 547.673 877.007 547.673C895.19 547.673 907.499 535.422 907.559 517.239C907.588 500.895 907.559 484.551 907.559 468.207V468.237Z"/></g></defs><use href="#lg" class="f"/><use href="#lg" class="s" transform="translate(0 19)"/></svg></div>
+      <div class="sub"><b>Hyperfuente</b> · espacio tipográfico 360<br>Leer es encontrar un recorrido — Biblioteca Nacional Mariano Moreno</div>
+    </div>
+    <div class="compass"><b id="deg">000°</b><span id="dir">N</span></div>
+  </header>
+  <footer>
+    <div class="hint">Arrastrá para mirar 360° · WASD / flechas para caminar<br>Rueda o pellizco: zoom · Click en un glifo para leerlo</div>
+    <div class="controls">
+      <button id="tour">▶ Recorrido</button>
+      <label class="frag">Fragmentación <input id="frag" type="range" min="0" max="100" value="55"></label>
+      <button data-theme="negro" class="on">Negro</button>
+      <button data-theme="rosa">Rosa</button>
+      <button id="fs">⤢</button>
+    </div>
+  </footer>
+</div>
+<div class="card" id="card">
+  <div class="hd"><span id="cardTitle">GLIFO</span><span id="cardNum">01</span></div>
+  <svg id="cardSvg"></svg>
+  <div class="meta" id="cardMeta"></div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="lib/SVGLoader.js"></script>
+<script>
+(function(){
+const GLYPHS={"t": {"d": "M196.731 563.775L323.23 563.77L323.229 508.341H307.51C308.242 521.834 306.779 543.715 280.458 547.363H222.333C214.169 545.78 197.62 538.098 196.743 520.008L196.731 519.746C196.029 503.52 196.238 351.536 196.537 236.461L196.63 202.77L196.636 200.567L196.644 198.016L196.731 169.879L196.731 236.461L323.018 236.461V173.918V173.222V154.101C323.018 154.101 323.78 144.789 315.802 135.634C308.585 127.357 300.308 126.508 300.308 126.508L196.731 126.508L196.731 6.68046e-07L181.449 0L181.449 126.508L181.449 236.461L181.449 563.775H196.731Z", "x0": 181.4, "x1": 323.2, "base": 564, "top": 0}, "r": {"d": "M504.825 564.136H489.859V127.27C491.159 127.212 492.459 127.096 493.731 127.096C531.433 127.096 569.165 126.807 606.867 127.241C616.835 127.356 623.913 133.886 628.073 142.611C630.153 146.945 631.482 152.087 631.54 156.854C631.771 182.943 631.511 209.061 631.395 235.15C631.395 235.728 631.28 236.335 631.136 237.461H626.888C598.229 237.461 569.598 237.375 540.938 237.548C535.796 237.577 530.509 238.097 525.597 239.513C514.012 242.835 505.98 253.612 505.518 265.601C505.2 273.807 504.94 282.012 504.94 290.217C504.883 380.011 504.854 469.835 504.854 559.629C504.854 561.045 504.854 562.46 504.854 564.078L504.825 564.136Z", "x0": 489.9, "x1": 631.5, "base": 564, "top": 0}, "e": {"d": "M461.221 516.377H476.423V563.859H335.438V127.002H476.72V131.167C476.72 223.394 476.72 315.621 476.72 407.847C476.72 421.205 469.342 432.213 457.561 436.348C455.806 436.973 453.872 437.271 451.998 437.271C428.168 437.419 404.339 437.449 380.509 437.598C363.67 437.717 350.848 450.599 350.818 467.467C350.759 484.366 350.759 501.264 350.818 518.133C350.878 535.12 363.462 547.764 380.509 547.883C397.526 548.002 414.573 547.943 431.59 547.883C448.25 547.854 460.626 535.626 461.102 518.876C461.102 518.192 461.161 517.538 461.25 516.377H461.221ZM461.072 223.305C461.072 206.406 461.131 189.538 461.072 172.639C461.012 157.943 450.362 144.644 435.844 143.841C416.179 142.77 396.366 142.71 376.701 143.752C361.29 144.585 350.848 157.675 350.818 173.264C350.789 206.347 350.759 239.459 350.818 272.542C350.818 289.648 363.7 302.411 380.806 302.441C397.556 302.441 414.305 302.441 431.054 302.441C448.547 302.441 461.072 289.857 461.102 272.304C461.102 255.971 461.102 239.608 461.102 223.275L461.072 223.305Z", "x0": 335.4, "x1": 476.7, "base": 564, "top": 0}, "l": {"d": "M168.785 563.329H154.191V1.28809H168.785V563.329Z", "x0": 154.2, "x1": 168.8, "base": 564, "top": 0}, "_": {"d": "M627.295 563.763L627.295 549.506L768.566 549.506L768.566 563.763L627.295 563.763Z", "x0": 627.3, "x1": 768.6, "base": 564, "top": 0}, "a": {"d": "M15.5131 174.669H0.237294V127.002H141.694V564.195H0C0 562.652 0 561.317 0 559.953C0 467.703 0 375.483 0 283.233C0 271.843 4.68656 262.826 14.5639 257.16C17.9157 255.232 22.187 254.164 26.0727 254.075C50.0394 253.63 74.0061 253.69 97.9431 253.334C112.596 253.126 125.41 241.083 125.795 226.489C126.3 207.565 126.3 188.611 125.795 169.686C125.41 155.359 112.507 143.227 98.1804 143.049C79.9384 142.812 61.6668 142.812 43.4248 143.049C28.7719 143.257 16.8182 155.626 15.7207 171.11C15.6317 172.178 15.5724 173.245 15.4834 174.64L15.5131 174.669ZM126.062 468.237C126.062 451.626 126.122 435.015 126.062 418.375C125.973 401.467 113.664 388.801 96.816 388.564C79.5232 388.327 62.2304 388.327 44.9376 388.564C28.5643 388.772 15.9284 401.319 15.8097 417.693C15.6021 451.478 15.5724 485.263 15.8097 519.019C15.9284 535.363 28.9499 547.673 45.2638 547.673C62.0227 547.673 78.7816 547.673 95.5108 547.673C113.694 547.673 126.003 535.422 126.062 517.239C126.092 500.895 126.062 484.551 126.062 468.207V468.237Z", "x0": 0, "x1": 141.7, "base": 564, "top": 0}, "A": {"d": "M106.526 315.496L2.04478 315.496L2.04481 -8.47088e-05L971 0L971 2902.72L-0.000244141 2902.72L-0.000241721 2875.05C-0.000188148 2262.24 -0.000134575 1649.44 -8.10015e-05 1036.63C-7.3242e-05 947.873 50.7071 874.731 131.675 847.254C143.738 843.103 157.029 841.126 169.91 841.126C333.686 840.138 497.461 839.94 661.237 838.952C776.964 838.161 865.088 752.565 865.292 640.481C865.701 528.199 865.701 415.917 865.292 303.833C864.883 190.958 778.395 106.945 661.237 106.154C544.284 105.363 427.126 105.758 310.172 106.154C195.672 106.351 110.615 187.598 107.344 298.891C107.344 303.438 106.935 307.787 106.322 315.496L106.526 315.496ZM107.548 2262.84C107.548 2375.12 107.139 2487.2 107.548 2599.48C107.957 2697.14 181.155 2785.5 280.934 2790.84C416.085 2797.95 552.257 2798.35 687.408 2791.43C793.321 2785.9 865.087 2698.92 865.292 2595.33C865.496 2375.51 865.701 2155.5 865.292 1935.68C865.292 1822.01 776.759 1737.21 659.192 1737.01C544.079 1737.01 428.966 1737.01 313.852 1737.01C193.627 1737.01 107.548 1820.63 107.343 1937.26C107.343 2045.78 107.343 2154.51 107.343 2263.03L107.548 2262.84Z", "x0": 0, "x1": 971, "base": 2903, "top": 0}};
+const S=0.01; // 1 unidad tipográfica = 1 cm
+const LIME=0xD5FE00,PINK=0xF099EA;
+
+// ---------- Paletas ----------
+const THEMES={
+  negro:{bg:0x000000,fog:[45,150],lime:LIME,pink:PINK,white:0xffffff,line:0xffffff,lineOp:.45,outline:PINK,ink:'#ffffff',dark:true},
+  rosa:{bg:PINK,fog:[45,150],lime:LIME,pink:0xffffff,white:0x111111,line:0x111111,lineOp:.5,outline:0x111111,ink:'#111111',dark:false}
+};
+let theme='negro';
+const sideOf=(hex)=>new THREE.Color(hex).multiplyScalar(.55);
+
+// ---------- Escena ----------
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.localClippingEnabled=true;
+document.body.prepend(renderer.domElement);
+const cvs=renderer.domElement;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0);
+scene.fog=new THREE.Fog(0,45,150);
+const camera=new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,600);
+camera.rotation.order='YXZ';camera.position.set(0,2,3);
+
+const texLoader=new THREE.TextureLoader();
+function tex(src,rx=1,ry=1){const t=texLoader.load(src);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return t;}
+
+// colorables: {mat, role, kind:'face'|'side'|'tint'|'line'|'outline'}
+const tinted=[];
+function reg(mat,role,kind){tinted.push({mat,role,kind});return mat;}
+
+// ---------- Glifos alter_a ----------
+const svgLoader=new THREE.SVGLoader();
+const GEO={};
+function glyphData(ch){
+  if(GEO[ch])return GEO[ch];
+  const g=GLYPHS[ch];
+  const data=svgLoader.parse(`<svg xmlns="http://www.w3.org/2000/svg"><path d="${g.d}"/></svg>`);
+  const sp=data.paths[0];
+  const shapes=THREE.SVGLoader.createShapes?THREE.SVGLoader.createShapes(sp):sp.toShapes(true);
+  const cx=(g.x0+g.x1)/2,depth=34;
+  const geo=new THREE.ExtrudeGeometry(shapes,{depth,bevelEnabled:false,curveSegments:10});
+  geo.translate(-cx,-g.base,-depth/2);geo.scale(S,-S,S);geo.computeBoundingBox();
+  // contornos para la línea rosa desplazada
+  const contours=[];
+  shapes.forEach(sh=>{[sh,...sh.holes].forEach(c=>{
+    const pts=c.getPoints(10).map(p=>new THREE.Vector3((p.x-cx)*S,-(p.y-g.base)*S,0));
+    contours.push(new THREE.BufferGeometry().setFromPoints(pts));
+  });});
+  const H=(g.base-g.top)*S,W=(g.x1-g.x0)*S;
+  return GEO[ch]={geo,contours,H,W,depth:depth*S};
+}
+
+const glyphs=[],pickables=[];
+const tmpPlane=new THREE.Plane();
+function makeGlyph(ch,opt={}){
+  const D=glyphData(ch);
+  const role=opt.role||'lime',scale=opt.scale||1;
+  const group=new THREE.Group();group.scale.setScalar(scale);
+  const n=opt.bands||(3+Math.floor(Math.random()*4));
+  // cortes horizontales: como peldaños de una escalera
+  const cuts=[0];for(let i=1;i<n;i++)cuts.push(D.H*(i/n+(Math.random()-.5)*.6/n));cuts.push(D.H+.01);
+  cuts.sort((a,b)=>a-b);
+  const bands=[];
+  for(let i=0;i<n;i++){
+    const lo=cuts[i]-.002,hi=cuts[i+1]+.002;
+    const planes=[new THREE.Plane(new THREE.Vector3(0,1,0),-lo),new THREE.Plane(new THREE.Vector3(0,-1,0),hi)];
+    const wplanes=planes.map(p=>p.clone());
+    const face=reg(new THREE.MeshBasicMaterial({side:THREE.DoubleSide,clippingPlanes:wplanes}),role,'face');
+    const side=reg(new THREE.MeshBasicMaterial({side:THREE.DoubleSide,clippingPlanes:wplanes}),role,'side');
+    const m=new THREE.Mesh(D.geo,[face,side]);
+    m.userData.glyph=group;pickables.push(m);group.add(m);
+    const stair=opt.stair!=null?opt.stair:1;
+    const k=(i-(n-1)/2);
+    bands.push({m,planes,wplanes,
+      base:new THREE.Vector2(k*.18*stair*(Math.random()*.8+.6),i*.25*stair*(Math.random()*.8+.4)),
+      cur:new THREE.Vector2(),tgt:new THREE.Vector2(),phase:Math.random()*6});
+  }
+  // contorno intacto (la estructura) desplazado hacia abajo, como en el lettering
+  if(opt.outline!==false){
+    const omat=reg(new THREE.LineBasicMaterial({transparent:true,opacity:.95}),role,'outline');
+    const og=new THREE.Group();
+    D.contours.forEach(c=>og.add(new THREE.LineLoop(c,omat)));
+    og.position.set(0,-.19,D.depth/2+.06);group.add(og);
+  }
+  group.userData={ch,role,bands,D,word:opt.word||'',hover:0,glow:0,retarget:Math.random()*3,spin:opt.spin||null};
+  glyphs.push(group);
+  return group;
+}
+function advance(ch){const g=GLYPHS[ch];return (g.x1-g.x0+16)*S;}
+function placeWord(text,{angle,radius,y=0,scale=1,role='lime',stair=1,tilt=0}){
+  const word=new THREE.Group();
+  let w=0;[...text].forEach(c=>w+=advance(c));w-=16*S;
+  let x=-w/2;
+  [...text].forEach(c=>{
+    const g=makeGlyph(c,{role,scale:1,word:text,stair});
+    const a=advance(c);g.position.x=x+(a-16*S)/2;x+=a;word.add(g);
+  });
+  word.scale.setScalar(scale);
+  word.position.set(Math.sin(angle)*radius,y,Math.cos(angle)*radius);
+  scene.add(word);word.lookAt(0,y,0);word.rotateZ(tilt);
+  return word;
+}
+
+// Palabras de la alter_a alrededor del espectador
+placeWord("alter_a",{angle:Math.PI,radius:26,scale:2.1,role:'lime'});
+placeWord("letra",{angle:Math.PI*.5,radius:21,scale:1.45,role:'pink',y:.5});
+placeWord("alterar",{angle:-Math.PI*.5,radius:23,scale:1.15,role:'white',y:5});
+placeWord("arte",{angle:0,radius:24,scale:1.7,role:'lime',y:0});
+placeWord("real",{angle:Math.PI*.78,radius:15,scale:.55,role:'white',y:7.5,stair:1.6});
+placeWord("tela",{angle:-Math.PI*.22,radius:14,scale:.5,role:'pink',y:1.2,stair:1.4});
+placeWord("alerta",{angle:Math.PI*.28,radius:30,scale:.8,role:'white',y:11});
+placeWord("tal",{angle:-Math.PI*.75,radius:16,scale:.6,role:'lime',y:9});
+
+// Pilares: la "a" en dilatación, sosteniendo la losa
+const losaY=16.5;
+[[-30,-11],[30,-11],[30,11],[-30,11]].forEach(([x,z],i)=>{
+  const g=makeGlyph('A',{role:i%2?'pink':'lime',scale:losaY/29.03,bands:6,stair:.6,outline:false});
+  g.position.set(x,0,z);scene.add(g);g.lookAt(0,0,0);
+});
+
+// Módulos sueltos (fragmentos flotantes)
+const POOL="aletr";
+for(let i=0;i<18;i++){
+  const c=POOL[i%POOL.length];
+  const roles=['lime','pink','white'];
+  const g=makeGlyph(c,{role:roles[i%3],scale:.25+Math.random()*.7,stair:1.8,outline:Math.random()>.4,
+    spin:new THREE.Vector3((Math.random()-.5)*.2,(Math.random()-.5)*.4,(Math.random()-.5)*.15)});
+  const a=Math.random()*Math.PI*2,r=34+Math.random()*30,y=2+Math.random()*26;
+  g.position.set(Math.sin(a)*r,y,Math.cos(a)*r);g.rotation.set(Math.random()*.6,Math.random()*6,Math.random()*.6);
+  g.userData.baseY=y;g.userData.phase=Math.random()*6;scene.add(g);
+}
+
+// ---------- Hormigón y Biblioteca ----------
+const tConcrete=tex('tex/hormigon.jpg',3,1),tConcreteEnd=tex('tex/hormigon.jpg');
+const tTrama=tex('tex/hormigon_trama.jpg'),tLosa=tex('tex/bib_losa.jpg',2,1),tFachada=tex('tex/bib_fachada.jpg');
+const cSide=new THREE.MeshBasicMaterial({map:tConcrete});
+const cEnd=reg(new THREE.MeshBasicMaterial({map:tTrama}),'pink','tint');
+const cTop=new THREE.MeshBasicMaterial({map:tConcreteEnd,color:0x9a9a9a});
+function monolith(w,h,d,x,y,z,ry){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),[cEnd,cEnd,cTop,cTop,cSide,cSide]);
+  m.position.set(x,y,z);m.rotation.y=ry;scene.add(m);return m;
+}
+// el volumen largo del video, fugando
+monolith(36,9,9,-6,4.5,-46,.0);
+monolith(9,6,22,40,3,30,.35);
+
+// losa suspendida en trama (cara inferior de la Biblioteca)
+const losaMat=reg(new THREE.MeshBasicMaterial({map:tLosa,side:THREE.DoubleSide}),'pink','tint');
+const losa=new THREE.Mesh(new THREE.PlaneGeometry(68,26),losaMat);
+losa.rotation.x=Math.PI/2;losa.position.y=losaY+.3;scene.add(losa);
+const losaEdge=new THREE.Mesh(new THREE.BoxGeometry(68,2.2,26),new THREE.MeshBasicMaterial({map:tex('tex/hormigon.jpg',5,.3)}));
+losaEdge.position.y=losaY+1.5;scene.add(losaEdge);
+
+// paneles de fachada en trama lima
+[[Math.PI*.62,40,9],[-Math.PI*.6,42,7],[Math.PI*.05,44,12]].forEach(([a,r,h],i)=>{
+  const m=reg(new THREE.MeshBasicMaterial({map:tFachada,side:THREE.DoubleSide,transparent:true,opacity:1}),i===1?'pink':'lime','tint');
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(h*.75,h*1.33),m);
+  p.position.set(Math.sin(a)*r,h*.66,Math.cos(a)*r);p.lookAt(0,h*.66,0);scene.add(p);
+});
+
+// ---------- Líneas de fuga ----------
+const lineMat=reg(new THREE.LineBasicMaterial({transparent:true,opacity:.45}),'line','line');
+function seg(a,b){const g=new THREE.BufferGeometry().setFromPoints([a,b]);scene.add(new THREE.Line(g,lineMat));}
+for(let i=0;i<34;i++){const x=(Math.random()<.5?-1:1)*(5+Math.random()*38),y=Math.random()*26;seg(new THREE.Vector3(x,y,-300),new THREE.Vector3(x,y,300));}
+for(let i=0;i<16;i++){const z=(Math.random()<.5?-1:1)*(6+Math.random()*30),y=Math.random()*20;seg(new THREE.Vector3(-300,y,z),new THREE.Vector3(300,y,z));}
+// reglas horizontales que rodean el espacio
+for(let i=0;i<12;i++){
+  const y=i*2.3,pts=[];for(let k=0;k<=128;k++){const a=k/128*Math.PI*2;pts.push(new THREE.Vector3(Math.sin(a)*52,y,Math.cos(a)*52));}
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lineMat));
+}
+// abanico desde la "a" de alter_a hacia un punto de fuga
+const vp=new THREE.Vector3(70,26,-220);
+for(let i=0;i<14;i++){seg(new THREE.Vector3(-14+Math.random()*28,Math.random()*12,-26),vp);}
+
+// ---------- Fichas tipográficas (textos del sistema) ----------
+const panels=[];
+const PANELS=[
+  {t:'[ PROPORCIONES CONDENSADAS ]',d:'Caracteres altos y angostos que producen una sensación de compresión lateral.',a:Math.PI*.86,r:13,y:3.2},
+  {t:'[ MODULARIDAD VISUAL ]',d:'La repetición de recursos hace que las letras se perciban como partes de un mismo sistema.',a:Math.PI*.36,r:12,y:2.4},
+  {t:'ALTERACIÓN',n:'02',d:'Estructura familiar cambia de proporción.',a:-Math.PI*.38,r:12,y:2.2,box:true},
+  {t:'DILATACIÓN',d:'Los límites se expanden y las distancias aumentan.',a:-Math.PI*.62,r:13,y:3.6,u:true},
+  {t:'COMPRESIÓN',d:'Los elementos se acercan y el espacio disponible se reduce.',a:-Math.PI*.7,r:13.5,y:1.6,u:true},
+  {t:'> COMPRESIÓN\n> TENSIÓN',a:Math.PI*.12,r:12,y:4.5,list:true},
+  {big:'LEER ES ENCONTRAR UN RECORRIDO',a:Math.PI*1.0,r:12,y:6.8},
+  {big:'ENTRE SIGNO Y TEXTURA',a:Math.PI*.55,r:12,y:6.2},
+  {big:'REALIDAD / FICCIÓN / [ DISTORSIÓN ]',a:-Math.PI*.05,r:12,y:7.2},
+  {big:'ESPACIO NO REGISTRADO',a:-Math.PI*.9,r:13,y:5.4},
+];
+function drawPanel(cv,P){
+  const T=THEMES[theme],x=cv.getContext('2d');const W=cv.width,H=cv.height;
+  x.clearRect(0,0,W,H);const ink=T.ink;
+  x.textBaseline='top';
+  if(P.big){
+    x.font="500 54px 'IBM Plex Mono', monospace";x.fillStyle=ink;x.fillText(P.big,8,50);
+    x.fillRect(8,128,Math.min(W-16,x.measureText(P.big).width),3);return;
+  }
+  if(P.list){
+    x.font="500 60px 'IBM Plex Mono', monospace";x.fillStyle=ink;
+    P.t.split('\n').forEach((l,i)=>{x.fillRect(0,20+i*110,W,2);x.fillText(l,30,48+i*110);});x.fillRect(0,240,W,2);return;
+  }
+  if(P.box){
+    x.fillStyle='#D5FE00';x.fillRect(0,0,W,70);x.fillStyle='#000';x.font="700 44px 'IBM Plex Mono', monospace";x.fillText(P.t,18,12);
+    x.textAlign='right';x.fillText(P.n,W-18,12);x.textAlign='left';
+    x.strokeStyle='#D5FE00';x.lineWidth=3;x.strokeRect(1.5,70,W-3,H-72);
+    x.beginPath();x.moveTo(0,70);x.lineTo(W,170);x.stroke();
+    x.fillStyle=ink;x.font="400 40px 'IBM Plex Mono', monospace";wrap(x,P.d,22,190,W-40,50);return;
+  }
+  if(P.u){
+    x.fillStyle=ink;x.font="700 46px 'IBM Plex Mono', monospace";x.fillText(P.t,10,10);x.fillRect(10,64,x.measureText(P.t).width,4);
+    x.font="400 38px 'IBM Plex Mono', monospace";wrap(x,'• '+P.d,10,100,W-20,48);return;
+  }
+  x.fillStyle='#ffffff';x.fillRect(0,0,W,72);x.fillStyle='#000';x.font="700 42px 'IBM Plex Mono', monospace";
+  x.textAlign='right';x.fillText(P.t,W-20,14);x.textAlign='left';
+  x.fillStyle='#D5FE00';x.fillRect(W*.42,0,8,72);
+  x.fillStyle=ink;x.font="400 40px 'IBM Plex Mono', monospace";wrap(x,P.d,W*.45,100,W*.55-10,52);
+}
+function wrap(x,txt,px,py,maxW,lh){
+  let line='',y=py;txt.split(' ').forEach(w=>{const t=line?line+' '+w:w;if(x.measureText(t).width>maxW&&line){x.fillText(line,px,y);line=w;y+=lh;}else line=t;});if(line)x.fillText(line,px,y);
+}
+function buildPanels(){
+  PANELS.forEach(P=>{
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=P.big?160:(P.list?256:400);
+    drawPanel(cv,P);
+    const t=new THREE.CanvasTexture(cv);t.anisotropy=4;
+    const w=P.big?6.2:3.6,h=w*cv.height/cv.width;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+    m.position.set(Math.sin(P.a)*P.r,P.y,Math.cos(P.a)*P.r);m.lookAt(0,P.y,0);scene.add(m);
+    panels.push({P,cv,t});
+  });
+}
+function redrawPanels(){panels.forEach(p=>{drawPanel(p.cv,p.P);p.t.needsUpdate=true;});}
+
+// ---------- Restos: módulos rectangulares que derivan ----------
+const bits=[];
+['lime','pink','white'].forEach((role,ri)=>{
+  const mat=reg(new THREE.MeshBasicMaterial({side:THREE.DoubleSide}),role,'face');
+  const N=45,im=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),mat,N);
+  for(let i=0;i<N;i++){
+    const a=Math.random()*Math.PI*2,r=8+Math.random()*60;
+    bits.push({im,i,p:new THREE.Vector3(Math.sin(a)*r,Math.random()*28,Math.cos(a)*r),
+      s:new THREE.Vector3(.1+Math.random()*(Math.random()<.2?2.4:.6),.04+Math.random()*.35,1),
+      ry:Math.random()*6,v:(Math.random()-.5)*.8});
+  }
+  scene.add(im);
+});
+const dummy=new THREE.Object3D();
+
+// ---------- Temas ----------
+function applyTheme(name){
+  theme=name;const T=THEMES[name];
+  scene.background.setHex(T.bg);scene.fog.color.setHex(T.bg);[scene.fog.near,scene.fog.far]=T.fog;
+  tinted.forEach(({mat,role,kind})=>{
+    const base=role==='line'?T.line:T[role];
+    if(kind==='face'||kind==='tint')mat.color.setHex(base);
+    else if(kind==='side')mat.color.copy(sideOf(base));
+    else if(kind==='outline')mat.color.setHex(role==='pink'&&name==='negro'?0xffffff:T.outline);
+    else if(kind==='line'){mat.color.setHex(base);mat.opacity=T.lineOp;}
+  });
+  document.body.classList.toggle('rosa',name==='rosa');
+  document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('on',b.dataset.theme===name));
+  redrawPanels();
+}
+document.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>applyTheme(b.dataset.theme));
+let frag=.55;const fragInput=document.getElementById('frag');
+fragInput.oninput=()=>{frag=fragInput.value/100;};
+
+// ---------- Control 360 ----------
+let yaw=0,pitch=0,tYaw=0,tPitch=.05,fov=68,tFov=68;
+const pointers=new Map();let moved=0,pinch0=0,lastInput=performance.now();
+cvs.addEventListener('pointerdown',e=>{
+  cvs.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  moved=0;cvs.classList.add('dragging');stopTour();lastInput=performance.now();
+  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y);}
+});
+cvs.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId)){hoverAt(e.clientX,e.clientY);return;}
+  const p=pointers.get(e.pointerId);const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;lastInput=performance.now();
+  if(pointers.size===2){const [a,b]=[...pointers.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch0)tFov=THREE.MathUtils.clamp(tFov*pinch0/d,25,95);pinch0=d;moved=99;return;}
+  moved+=Math.abs(dx)+Math.abs(dy);const k=.0042*(fov/68);
+  tYaw+=dx*k;tPitch=THREE.MathUtils.clamp(tPitch+dy*k,-1.45,1.45);
+});
+function endPtr(e){if(pointers.size===1&&moved<6)pickAt(e.clientX,e.clientY);pointers.delete(e.pointerId);if(pointers.size<2)pinch0=0;if(!pointers.size)cvs.classList.remove('dragging');}
+cvs.addEventListener('pointerup',endPtr);cvs.addEventListener('pointercancel',endPtr);
+cvs.addEventListener('wheel',e=>{e.preventDefault();tFov=THREE.MathUtils.clamp(tFov+e.deltaY*.04,25,95);lastInput=performance.now();},{passive:false});
+const keys={};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(/^(w|a|s|d|arrow)/.test(k)){stopTour();lastInput=performance.now();}});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+// ---------- Selección ----------
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let hovered=null,selected=null;
+function glyphAt(x,y){ndc.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(pickables,false)[0];return h?h.object.userData.glyph:null;}
+function hoverAt(x,y){const g=glyphAt(x,y);if(g===hovered)return;hovered=g;cvs.classList.toggle('hover',!!g);}
+const card=document.getElementById('card');
+function pickAt(x,y){
+  const g=glyphAt(x,y);if(!g){selected=null;card.classList.remove('show');return;}
+  selected=g;showCard(g);
+  const wp=new THREE.Vector3();g.getWorldPosition(wp);
+  const s=new THREE.Vector3();g.getWorldScale(s);wp.y+=g.userData.D.H*s.y*.5;
+  const d=wp.sub(camera.position);let ty=Math.atan2(-d.x,-d.z);
+  while(ty-tYaw>Math.PI)ty-=Math.PI*2;while(ty-tYaw<-Math.PI)ty+=Math.PI*2;
+  tYaw=ty;tPitch=Math.atan2(d.y,Math.hypot(d.x,d.z));
+}
+function showCard(g){
+  const {ch,word,bands}=g.userData,G=GLYPHS[ch];
+  const svg=document.getElementById('cardSvg');
+  svg.setAttribute('viewBox',`${G.x0-12} ${G.top-12} ${G.x1-G.x0+24} ${G.base-G.top+44}`);
+  const sw=ch==='A'?20:5;
+  svg.innerHTML=`<path class="f" d="${G.d}"/><path class="s" style="stroke-width:${sw}" transform="translate(0 ${ch==='A'?60:19})" d="${G.d}"/>`;
+  document.getElementById('cardTitle').textContent='GLIFO  '+(ch==='A'?'a — dilatada':ch==='_'?'guion bajo':ch);
+  document.getElementById('cardNum').textContent=String(glyphs.indexOf(g)+1).padStart(2,'0');
+  const s=new THREE.Vector3();g.getWorldScale(s);
+  document.getElementById('cardMeta').innerHTML=
+    (word?`Palabra · ${word}<br>`:(ch==='A'?'Pilar · sostiene la losa<br>':'Módulo suelto · deriva<br>'))+
+    `Fragmentos · ${bands.length}<br>Altura · ${(g.userData.D.H*s.y).toFixed(1)} m`;
+  card.classList.add('show');
+}
+
+// ---------- Recorrido ----------
+let touring=false,tourT=0;const tourBtn=document.getElementById('tour');
+function startTour(){touring=true;tourBtn.classList.add('on');tourBtn.textContent='■ Detener';tourT=Math.atan2(camera.position.x,camera.position.z);}
+function stopTour(){if(!touring)return;touring=false;tourBtn.classList.remove('on');tourBtn.textContent='▶ Recorrido';}
+tourBtn.onclick=()=>touring?stopTour():startTour();
+document.getElementById('fs').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}catch(e){}};
+
+// ---------- Loop ----------
+const clock=new THREE.Clock(),fwd=new THREE.Vector3(),right=new THREE.Vector3();
+const deg=document.getElementById('deg'),dir=document.getElementById('dir');const DIRS=['N','NO','O','SO','S','SE','E','NE'];
+function loop(){
+  const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
+  if(touring){
+    tourT+=dt*.075;
+    const r=11+Math.sin(tourT*2)*5;
+    camera.position.set(Math.sin(tourT)*r,2+Math.max(0,Math.sin(tourT*1.5))*5,Math.cos(tourT)*r);
+    tYaw=tourT-Math.PI/2-.7+Math.sin(tourT*1.3)*.35;tPitch=.1+Math.sin(tourT*2.1)*.18;
+    while(tYaw-yaw>Math.PI)tYaw-=Math.PI*2;while(tYaw-yaw<-Math.PI)tYaw+=Math.PI*2;
+  }else{
+    const sp=(keys.shift?14:7)*dt;
+    fwd.set(-Math.sin(yaw),0,-Math.cos(yaw));right.set(Math.cos(yaw),0,-Math.sin(yaw));
+    if(keys.w||keys.arrowup)camera.position.addScaledVector(fwd,sp);
+    if(keys.s||keys.arrowdown)camera.position.addScaledVector(fwd,-sp);
+    if(keys.a||keys.arrowleft)camera.position.addScaledVector(right,-sp);
+    if(keys.d||keys.arrowright)camera.position.addScaledVector(right,sp);
+    const hr=Math.hypot(camera.position.x,camera.position.z);if(hr>70){camera.position.x*=70/hr;camera.position.z*=70/hr;}
+    if(performance.now()-lastInput>9000)tYaw+=dt*.04;
+  }
+  yaw+=(tYaw-yaw)*Math.min(1,dt*6);pitch+=(tPitch-pitch)*Math.min(1,dt*6);
+  camera.rotation.set(pitch,yaw,0);
+  fov+=(tFov-fov)*Math.min(1,dt*6);if(Math.abs(camera.fov-fov)>.01){camera.fov=fov;camera.updateProjectionMatrix();}
+
+  // fragmentación: las franjas se desplazan como peldaños y se reacomodan
+  glyphs.forEach(g=>{
+    const u=g.userData;
+    if(u.spin){g.rotation.x+=u.spin.x*dt;g.rotation.y+=u.spin.y*dt;g.rotation.z+=u.spin.z*dt;g.position.y=u.baseY+Math.sin(t*.5+u.phase)*.7;}
+    u.hover+=(((g===hovered||g===selected)?1:0)-u.hover)*Math.min(1,dt*6);
+    u.retarget-=dt;
+    const jump=u.retarget<0;if(jump)u.retarget=2+Math.random()*5;
+    const amp=frag*1.6+u.hover*1.2;
+    u.bands.forEach((b,i)=>{
+      if(jump){b.tgt.set((Math.random()-.5)*.5,(Math.random()-.5)*.3);}
+      const wob=.65+.35*Math.sin(t*.7+b.phase);
+      const tx=(b.base.x*wob+b.tgt.x)*amp,tz=(b.base.y*wob+b.tgt.y*.5)*amp;
+      b.cur.x+=(tx-b.cur.x)*Math.min(1,dt*4);b.cur.y+=(tz-b.cur.y)*Math.min(1,dt*4);
+      b.m.position.set(b.cur.x,0,b.cur.y);
+    });
+  });
+  scene.updateMatrixWorld();
+  glyphs.forEach(g=>g.userData.bands.forEach(b=>{b.wplanes[0].copy(b.planes[0]).applyMatrix4(b.m.matrixWorld);b.wplanes[1].copy(b.planes[1]).applyMatrix4(b.m.matrixWorld);}));
+
+  bits.forEach(b=>{b.p.x+=b.v*dt;if(Math.abs(b.p.x)>70)b.p.x*=-.98;dummy.position.copy(b.p);dummy.rotation.set(0,b.ry,0);dummy.scale.copy(b.s);dummy.updateMatrix();b.im.setMatrixAt(b.i,dummy.matrix);});
+  bits.forEach(b=>b.im.instanceMatrix.needsUpdate=true);
+
+  const d=((-yaw*180/Math.PI)%360+360)%360;
+  deg.textContent=String(Math.round(d)).padStart(3,'0')+'°';dir.textContent=DIRS[Math.round(((360-d)%360)/45)%8];
+  renderer.render(scene,camera);requestAnimationFrame(loop);
+}
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+const ready=document.fonts&&document.fonts.load?Promise.all([document.fonts.load("500 54px 'IBM Plex Mono', monospace"),document.fonts.load("700 44px 'IBM Plex Mono', monospace"),document.fonts.load("400 40px 'IBM Plex Mono', monospace")]):Promise.resolve();
+const go=()=>{buildPanels();applyTheme('negro');const l=document.getElementById('load');l.style.opacity=0;setTimeout(()=>l.remove(),700);};
+ready.then(go,go);
+loop();
+})();
+</script>
+</body>
+</html>
